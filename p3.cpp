@@ -70,6 +70,7 @@ int main(){
 		}
 		else{
 			maskRight = ans[ans.size()-1].right;
+			maxRight = maskRight;
 		}
 	}
 	cout << "No solution" << endl;
