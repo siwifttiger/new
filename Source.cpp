@@ -241,6 +241,17 @@ int main()
 	selector = smgr->createTriangleSelector(node);
 	node->setTriangleSelector(selector);
 	selector->drop();
+	scene::IAnimatedMeshSceneNode* gunNode = smgr->addAnimatedMeshSceneNode(smgr->getMesh("../../media/gun.md2"),0,IDFlag_IsPickable|IDFlag_IsHighlightable);
+	gunNode->setScale(core::vector3df(3));
+	gunNode->setRotation(core::vector3df(0,-90.0,0));
+	gunNode->setMaterialTexture(0, driver->getTexture("../../media/gun.jpg"));
+	gunNode->getMaterial(0).NormalizeNormals = true;
+	gunNode->getMaterial(0).Lighting = true;
+
+	selector = smgr->createTriangleSelector(gunNode);
+	gunNode->setTriangleSelector(selector);
+	selector->drop();
+
 	for (int i = 1; i <= 3; ++i){
 		node = smgr->addAnimatedMeshSceneNode(smgr->getMesh("../../media/cheetor.md2"), 0, IDFlag_IsPickable | IDFlag_IsHighlightable);
 		if (node){
@@ -269,7 +280,7 @@ int main()
 	node = smgr->addAnimatedMeshSceneNode(smgr->getMesh("../../media/dwarf.x"),
 		0, IDFlag_IsPickable | IDFlag_IsHighlightable);
 	node->setPosition(core::vector3df(-70, -66, -30)); // Put its feet on the floor.
-	node->setRotation(core::vector3df(0, -90, 0)); // And turn it towards the camera.
+	//node->setRotation(core::vector3df(0, -90, 0)); // And turn it towards the camera.
 	node->setAnimationSpeed(20.f);
 	node->getMaterial(0).Lighting = true;
 	selector = smgr->createTriangleSelector(node);
@@ -353,8 +364,8 @@ int main()
 
 		scene::IParticleEmitter* em = ps->createPointEmitter((camera->getTarget() - ray.start).normalize());
 
-		if (reciever.IsKeyDown(irr::KEY_KEY_J)){
-			std::cout << "A" << std::endl;
+		
+			
 
 
 			ps->setEmitter(em); // this grabs the emitter
@@ -366,14 +377,15 @@ int main()
 			ps->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
 			ps->setMaterialTexture(0, driver->getTexture("../../media/fire.bmp"));
 			ps->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
-		}
+		
 
 		if (selectedSceneNode)
 		{
 			
 
 			bill->setPosition(ray.start + (camera->getTarget() - ray.start).normalize() * 200.0f);
-
+			gunNode->setPosition(ray.start + (camera->getTarget() - ray.start).normalize() * 200.0f);
+			gunNode->setRotation(core::vector3df(camera->getRotation().X, camera->getRotation().Y + 90.0, camera->getRotation().Z));
 			// We need to reset the transform before doing our own rendering.
 			driver->setTransform(video::ETS_WORLD, core::matrix4());
 			driver->setMaterial(material);
