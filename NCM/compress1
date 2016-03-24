@@ -1,0 +1,168 @@
+#include<iostream>
+#include<string>
+using namespace std;
+
+//非终结符集合 
+struct VNS{
+       int Nv;
+       string VN[10];
+       bool reached[10];
+}Vns; 
+
+// 终结符集合 
+struct VTS{
+       int Nt;
+       string VT[10];
+            
+}Vts;
+
+//产生式集合 
+struct PS{
+       int Np;
+       string pl[100];
+       string pr[100];
+       bool self[100];  //对于每一个表达式，判断是否是自产生式 
+       bool reached[100]; //对于每一个表达式，判断是否可达 
+}Ps;
+
+string S; //start
+
+//判断是否可达 
+void isReachedP(PS & ps, VNS &vns){
+     for(int i = 0; i < ps.Np; ++i ){
+             for(int j = 0; j < vns.Nv; ++j){
+                     if(ps.pl[i] == vns.VN[j] && vns.reached[j] == false ){
+                                 ps.reached[i] = false;
+                                 break;
+                     }        
+             }                     
+     }     
+} 
+
+//判断是否是自产生式 
+void isSelf(PS &ps){
+     for(int i = 0; i < ps.Np;++i){
+             if(ps.pl[i] == ps.pr[i]){
+                         ps.self[i] = true;
+             }
+     }     
+}
+
+//判断是否是不可达的非终结符
+void isUnreachedVn(VNS &vns, PS &ps){
+     for(int i = 1; i < vns.Nv; ++i){
+             for(int j = 0; j < ps.Np; ++j){
+                     if(ps.pr[j].find(vns.VN[i]) != std::string::npos)
+			vns.reached[i] = true;
+                                                 
+             }
+             
+     }                       
+} 
+
+//判断该符号是否是不可达的非终结符
+//返回为假则说明是不可达的
+//返回为真说明是可达的 
+bool isUnreachedVn(string vn, VNS& vns){
+     for(int i = 1; i < vns.Nv; ++i){
+             if(vn == vns.VN[i] && vns.reached[i] == false){
+                   return false;
+             }
+     }
+     return true;
+} 
+
+int main(){
+    cin >> S;
+    int nv,nt,np;
+    string vn,vt,pl,pr;
+    string p[100];
+    //输入非终结符
+    cin >> nv;
+    Vns.Nv = nv; 
+    for(int i = 0; i < nv; ++ i){
+            cin >> vn;
+            Vns.VN[i] = vn;
+	if(i == 0)
+            Vns.reached[i] = true;
+	else Vns.reached[i] = false;
+    } 
+    
+    //输入非终结符
+    cin >> nt;
+    Vts.Nt = nt;
+    for(int i = 0; i < nt; ++i){
+            cin >> vt;
+            Vts.VT[i] = vt;
+    }
+    
+    //输入产生式
+    cin >> np;
+    Ps.Np = np;
+    for(int i = 0; i < np; ++ i){
+            cin >> pl;
+            Ps.pl[i] = pl;
+            cin >> pr;
+            Ps.pr[i] = pr;
+            Ps.reached[i] = true;
+            Ps.self[i] = false;
+    } 
+    isUnreachedVn(Vns,Ps);
+    isSelf(Ps);
+    isReachedP(Ps,Vns);
+    //删除自产生式 
+    for(int i = 0; i < Ps.Np; ++ i){
+            if(Ps.self[i] == true){
+                          cout << "delete self production:" << Ps.pl[i] << "::="  << Ps.pr[i] << endl;
+                          Ps.pl[i] = "";
+                          Ps.pr[i] = "";
+            }
+    }
+    
+    //删除不可达非终结符和不可达产生式
+    for(int i = 0; i < Vns.Nv; ++ i){
+            if(Vns.reached[i] == false){
+                              cout << "Unreached Vn:" << Vns.VN[i] << endl;
+                              for(int j = 0; j < Ps.Np; ++ j){
+                                      if(Ps.pl[j] == Vns.VN[i]){
+                                                      cout << "delete production:" << Ps.pl[j] << "::=" << Ps.pr[j] << endl;
+                                                      Ps.pl[j] = "";
+                                                      Ps.pr[j] = ""; 
+							
+                                      }
+                              }
+                              cout << "delete VN:" << Vns.VN[i] << endl;
+                              //Vns.VN[i] = "";
+            }
+							//isUnreachedVn(Vns,Ps);
+							//isReachedP(Ps,Vns);
+    }
+    //开始合并
+    
+    for(int i = 0; i < Vns.Nv; ++i){
+            for(int j = 0; j < Ps.Np; ++j){
+		    if(Ps.pl[j]=="") continue;
+                    else if(Ps.pl[j] == Vns.VN[i]){
+                                p[i] = p[i] + Ps.pr[j] + " | ";
+				//cout << Ps.pr[j] << endl;
+                    }
+            }
+    }    
+    cout << "G[" << S << "]:" << endl; 
+   for(int i = 0; i < Vns.Nv; ++i){
+          if(Vns.reached[i] == false) continue;
+            cout << Vns.VN[i] << "::=" << p[i].substr(0,p[i].size()-3) << endl;
+   }
+	
+   for(int i = 0; i < Vns.Nv; ++i){
+          if(Vns.reached[i] == false) continue;
+            cout << Vns.VN[i] <<  endl;
+   }
+
+   for(int i = 0; i < Ps.Np; ++i){
+	cout << Ps.pl[i] << "::=" << Ps.pr[i] << endl;
+}
+    
+}
+
+
